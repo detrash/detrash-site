@@ -4,17 +4,17 @@ import { appWithTranslation } from 'next-i18next';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import 'react-circular-progressbar/dist/styles.css';
+import Script from 'next/script';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
 import { FormProvider } from 'src/context/formContext';
 import { apolloClient } from 'src/lib/apollo';
-import { wagmiConfig, queryClient } from 'src/lib/wagmi';
+import Web3ModalProvider from 'src/lib/WagmiProvider';
 import { APP_NAV_LINKS } from 'src/utils/navLinks';
-import { WagmiProvider } from 'wagmi';
-import { QueryClientProvider } from '@tanstack/react-query';
+
+import 'react-circular-progressbar/dist/styles.css';
+import 'react-toastify/dist/ReactToastify.css';
 import '../styles/globals.scss';
-import Script from 'next/script';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -41,15 +41,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         `}
       </Script>
       <ApolloProvider client={apolloClient}>
-        <WagmiProvider config={wagmiConfig}>
-          <QueryClientProvider client={queryClient}>
-            <UserProvider>
-              <FormProvider>
-                <Component {...pageProps} />
-              </FormProvider>
-            </UserProvider>
-          </QueryClientProvider>
-        </WagmiProvider>
+        <Web3ModalProvider>
+          <UserProvider>
+            <FormProvider>
+              <Component {...pageProps} />
+            </FormProvider>
+          </UserProvider>
+        </Web3ModalProvider>
       </ApolloProvider>
 
       <ToastContainer />

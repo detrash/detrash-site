@@ -1,6 +1,7 @@
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import { QueryClient } from '@tanstack/react-query';
+import { cookieStorage, createStorage } from 'wagmi';
 import { Chain, goerli } from 'wagmi/chains';
 
 const celoChain: Chain = {
@@ -24,7 +25,9 @@ const celoChain: Chain = {
 export const queryClient = new QueryClient();
 
 // 1. Get projectId at https://cloud.walletconnect.com
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_ID || 'test';
+export const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_ID;
+
+if (!projectId) throw new Error('NEXT_PUBLIC_WALLETCONNECT_ID is not defined');
 
 // 2. Create wagmiConfig
 const metadata = {
@@ -40,13 +43,6 @@ export const wagmiConfig = defaultWagmiConfig({
   chains,
   projectId,
   metadata,
+  ssr: true,
   enableEmail: true,
-});
-
-// 3. Create modal
-createWeb3Modal({
-  wagmiConfig,
-  projectId,
-  enableAnalytics: true, // Optional - defaults to your Cloud configuration
-  enableOnramp: true, // Optional - false as default
 });
