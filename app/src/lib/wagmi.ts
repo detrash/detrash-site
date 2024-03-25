@@ -1,25 +1,7 @@
-import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import { QueryClient } from '@tanstack/react-query';
-import { cookieStorage, createStorage } from 'wagmi';
-import { Chain, goerli } from 'wagmi/chains';
 
-const celoChain: Chain = {
-  id: 42220,
-  name: 'Celo',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Celo',
-    symbol: 'CELO',
-  },
-  rpcUrls: {
-    default: { http: ['https://forno.celo.org/'] },
-  },
-  blockExplorers: {
-    default: { name: 'Celo Explorer', url: 'https://explorer.celo.org/' },
-  },
-  testnet: false,
-};
+import { alfajoresChain, celoChain } from 'src/config';
 
 // 0. Setup queryClient
 export const queryClient = new QueryClient();
@@ -37,7 +19,7 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
 };
 
-const chains = [celoChain, goerli] as const;
+const chains = [celoChain, alfajoresChain] as const;
 
 export const wagmiConfig = defaultWagmiConfig({
   chains,
