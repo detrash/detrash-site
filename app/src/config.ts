@@ -13,7 +13,7 @@ export const celoChain: Chain = {
     default: { http: ['https://forno.celo.org/'] },
   },
   blockExplorers: {
-    default: { name: 'Celo Explorer', url: 'https://explorer.celo.org/' },
+    default: { name: 'Celo Explorer', url: 'https://celoscan.io/' },
   },
   testnet: false,
 };
@@ -32,18 +32,18 @@ export const alfajoresChain: Chain = {
   blockExplorers: {
     default: {
       name: 'Celo Explorer',
-      url: 'https://explorer.celo.org/alfajores',
+      url: 'https://alfajores.celoscan.io/',
     },
   },
   testnet: true,
 };
 
 export const CRECY_TOKEN_ADDRESSES: { [id: number]: Address } = {
-  [celoChain.id]: '0x34C11A932853Ae24E845Ad4B633E3cEf91afE583',
-  [alfajoresChain.id]: '0x34C11A932853Ae24E845Ad4B633E3cEf91afE583',
+  [celoChain.id]: '0x34C11A932853Ae24E845Ad4B633E3cEf91afE583', // TODO: Update address
+  [alfajoresChain.id]: '0xf64C1a07144B22cdD109d5b82004aEd4759114c4',
 };
 
 export const TIME_LOCK_ADDRESSES: { [id: number]: Address } = {
-  [celoChain.id]: '0x34C11A932853Ae24E845Ad4B633E3cEf91afE583',
-  [alfajoresChain.id]: '0x34C11A932853Ae24E845Ad4B633E3cEf91afE583',
+  [celoChain.id]: '0x34C11A932853Ae24E845Ad4B633E3cEf91afE583', // TODO: Update address
+  [alfajoresChain.id]: '0x03eB6a8d135e1d27214116Cf7c794f00aba9dd92',
 };

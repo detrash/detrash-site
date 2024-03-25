@@ -1,21 +1,33 @@
-import { useCallback, useMemo, useState } from 'react';
-import { erc20Abi } from 'viem';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Address, erc20Abi } from 'viem';
 import {
   useAccount,
   useReadContract,
   useSimulateContract,
+  useWaitForTransactionReceipt,
   useWriteContract,
 } from 'wagmi';
 
 import { timelockAbi } from 'src/abis';
 import { CRECY_TOKEN_ADDRESSES, TIME_LOCK_ADDRESSES } from 'src/config';
 
-export const useLockRECY = ({ amount }: { amount: bigint }) => {
+export const useLockRECY = ({
+  amount,
+  balance,
+}: {
+  amount: bigint;
+  balance?: bigint;
+}) => {
   const { address, chainId } = useAccount();
   const cRECYAddress = chainId ? CRECY_TOKEN_ADDRESSES[chainId] : undefined;
   const timelockAddress = chainId ? TIME_LOCK_ADDRESSES[chainId] : undefined;
-  const [isApproving, setIsApproving] = useState(false);
-  const [isLocking, setIsLocking] = useState(false);
+  const [approveTx, setApproveTx] = useState<Address>('0x');
+  const [lockTx, setLockTx] = useState<Address>('0x');
+
+  const hasEnoughBalance = useMemo(() => {
+    if (balance === undefined) return undefined;
+    return balance >= amount;
+  }, [amount, balance]);
 
   const {
     data: allowance,
@@ -26,7 +38,10 @@ export const useLockRECY = ({ amount }: { amount: bigint }) => {
     address: cRECYAddress,
     functionName: 'allowance',
     args: [address!, timelockAddress!],
-    query: { enabled: !!address && !!cRECYAddress && !!timelockAddress },
+    query: {
+      enabled:
+        !!address && !!cRECYAddress && !!timelockAddress && hasEnoughBalance,
+    },
   });
   const { writeContractAsync } = useWriteContract();
 
@@ -46,42 +61,57 @@ export const useLockRECY = ({ amount }: { amount: bigint }) => {
       },
     });
 
+  const { isLoading: isApproving, isSuccess: isApproved } =
+    useWaitForTransactionReceipt({
+      hash: approveTx,
+      query: { enabled: approveTx !== '0x' },
+    });
+
+  useEffect(() => {
+    refetchAllowance();
+  }, [isApproved, refetchAllowance]);
+
   const approve = useCallback(async () => {
     if (isApproveSimulationLoading || !approveSimulation) return;
-    setIsApproving(true);
-    await writeContractAsync(approveSimulation.request);
-    setIsApproving(false);
-    refetchAllowance();
-  }, [
-    isApproveSimulationLoading,
-    approveSimulation,
-    writeContractAsync,
-    refetchAllowance,
-  ]);
+
+    const tx = await writeContractAsync(approveSimulation.request);
+    setApproveTx(tx);
+  }, [isApproveSimulationLoading, approveSimulation, writeContractAsync]);
 
   const { data: lockSimulation, isLoading: isLockSimulationLoading } =
     useSimulateContract({
       abi: timelockAbi,
-      address: cRECYAddress!,
+      address: timelockAddress!,
       functionName: 'lock',
       args: [amount],
       query: {
-        enabled: !!cRECYAddress && !!timelockAddress && !shouldApprove,
+        enabled: !!timelockAddress && !shouldApprove && hasEnoughBalance,
       },
+    });
+
+  const { isLoading: isLocking, isSuccess: isLocked } =
+    useWaitForTransactionReceipt({
+      hash: lockTx,
+      query: { enabled: lockTx !== '0x' },
     });
 
   const lock = useCallback(async () => {
     if (isLockSimulationLoading || !lockSimulation) return;
-    setIsLocking(true);
-    await writeContractAsync(lockSimulation.request);
-    setIsLocking(false);
+    const tx = await writeContractAsync(lockSimulation.request);
+    setLockTx(tx);
   }, [isLockSimulationLoading, lockSimulation, writeContractAsync]);
 
+  const isLoading =
+    isLoadingAllowance || isApproveSimulationLoading || isLockSimulationLoading;
+
   return {
-    isLoadingAllowance,
+    hasEnoughBalance,
+    isLoading,
     shouldApprove,
     isApproving,
+    isApproved,
     isLocking,
+    isLocked,
     approve,
     lock,
   };
