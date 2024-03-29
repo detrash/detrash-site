@@ -1,19 +1,20 @@
-import { ApolloProvider } from "@apollo/client";
-import { UserProvider } from "@auth0/nextjs-auth0";
-import { appWithTranslation } from "next-i18next";
-import type { AppProps } from "next/app";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import "react-circular-progressbar/dist/styles.css";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { FormProvider } from "src/context/formContext";
-import { apolloClient } from "src/lib/apollo";
-import { WagmiClient } from "src/lib/wagmi";
-import { APP_NAV_LINKS } from "src/utils/navLinks";
-import { WagmiConfig } from "wagmi";
-import "../styles/globals.scss";
-import Script from "next/script";
+import { ApolloProvider } from '@apollo/client';
+import { UserProvider } from '@auth0/nextjs-auth0';
+import { appWithTranslation } from 'next-i18next';
+import type { AppProps } from 'next/app';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import Script from 'next/script';
+import { ToastContainer } from 'react-toastify';
+
+import { FormProvider } from 'src/context/formContext';
+import { apolloClient } from 'src/lib/apollo';
+import Web3ModalProvider from 'src/lib/WagmiProvider';
+import { APP_NAV_LINKS } from 'src/utils/navLinks';
+
+import 'react-circular-progressbar/dist/styles.css';
+import 'react-toastify/dist/ReactToastify.css';
+import '../styles/globals.scss';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -40,13 +41,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         `}
       </Script>
       <ApolloProvider client={apolloClient}>
-        <WagmiConfig client={WagmiClient}>
+        <Web3ModalProvider>
           <UserProvider>
             <FormProvider>
               <Component {...pageProps} />
             </FormProvider>
           </UserProvider>
-        </WagmiConfig>
+        </Web3ModalProvider>
       </ApolloProvider>
 
       <ToastContainer />
