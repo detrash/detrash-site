@@ -4,6 +4,7 @@ export const APP_NAV_LINKS = {
   ONBOARDING: '/onboarding',
   PROFILE: '/profile',
   SUBMIT_FORM: '/submit',
+  FCW_STATUS: '/fcw-status',
 };
 
 export const APP_HEADER_LINKS = [
@@ -14,6 +15,7 @@ export const APP_HEADER_LINKS = [
     isRecyclerOrWasteAccess: true,
     key: 'submit_form',
   },
+  { name: 'FCW Status', href: APP_NAV_LINKS.FCW_STATUS, key: 'fcw-status' },
   {
     name: 'Admin',
     href: APP_NAV_LINKS.ADMIN_PANEL,

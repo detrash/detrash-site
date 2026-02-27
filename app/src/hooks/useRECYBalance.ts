@@ -1,19 +1,54 @@
-import { useEffect, useRef } from 'react';
-import { useAccount, useBalance } from 'wagmi';
+import { useEffect, useMemo, useRef } from 'react';
+import { useAccount } from 'wagmi';
+import { useReadContracts } from 'wagmi';
+import { erc20Abi, formatUnits } from 'viem';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'next-i18next';
-
-const CRECY_TOKEN_ADDRESS = '0x34C11A932853Ae24E845Ad4B633E3cEf91afE583';
+import { CRECY_TOKEN_ADDRESSES } from 'src/config';
 
 export const useRECYBalance = () => {
   const { t } = useTranslation();
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const hasTriggeredError = useRef(false);
 
-  const { data, isLoading, error } = useBalance({
-    addressOrName: address,
-    token: CRECY_TOKEN_ADDRESS,
+  const cRECYAddress = chainId ? CRECY_TOKEN_ADDRESSES[chainId] : undefined;
+
+  const {
+    isLoading,
+    data: data2,
+    error,
+  } = useReadContracts({
+    allowFailure: false,
+    contracts: [
+      {
+        address: cRECYAddress!,
+        abi: erc20Abi,
+        functionName: 'balanceOf',
+        args: [address!],
+      },
+      {
+        address: cRECYAddress!,
+        abi: erc20Abi,
+        functionName: 'decimals',
+      },
+      {
+        address: cRECYAddress!,
+        abi: erc20Abi,
+        functionName: 'symbol',
+      },
+    ],
+    query: { enabled: !!address && !!cRECYAddress },
   });
+
+  const data = useMemo(() => {
+    if (!data2) return undefined;
+    return {
+      decimals: data2[1],
+      formatted: formatUnits(data2[0], data2[1]),
+      symbol: data2[2],
+      value: data2[0],
+    };
+  }, [data2]);
 
   useEffect(() => {
     if (error && !hasTriggeredError.current) {
